@@ -1,14 +1,18 @@
-import { DataSourceConfig } from 'apollo-datasource';
-import { ApolloLink, execute, GraphQLRequest, makePromise } from 'apollo-link';
-import { setContext } from 'apollo-link-context';
-import { onError } from 'apollo-link-error';
-import { createHttpLink } from 'apollo-link-http';
-import { ApolloError, AuthenticationError, ForbiddenError } from 'apollo-server-errors';
-import to from 'await-to-js';
-import { DocumentNode } from 'graphql';
-import fetch from 'isomorphic-fetch';
+import { DataSource, DataSourceConfig } from "apollo-datasource";
+import { ApolloLink, execute, GraphQLRequest, makePromise } from "apollo-link";
+import { setContext } from "apollo-link-context";
+import { onError } from "apollo-link-error";
+import { createHttpLink } from "apollo-link-http";
+import {
+  ApolloError,
+  AuthenticationError,
+  ForbiddenError,
+} from "apollo-server-errors";
+import to from "await-to-js";
+import { DocumentNode } from "graphql";
+import fetch from "isomorphic-fetch";
 
-export class GraphQLDataSource<TContext = any> {
+export class GraphQLDataSource<TContext = any> extends DataSource<TContext> {
   public baseURL!: string;
   public context!: TContext;
 
@@ -51,7 +55,7 @@ export class GraphQLDataSource<TContext = any> {
         apolloError = new ForbiddenError(message);
         break;
       case 502:
-        apolloError = new ApolloError('Bad Gateway', status);
+        apolloError = new ApolloError("Bad Gateway", status);
         break;
       default:
         apolloError = new ApolloError(message, status);
@@ -76,7 +80,9 @@ export class GraphQLDataSource<TContext = any> {
     const baseURL = this.baseURL;
 
     if (!baseURL) {
-      throw new ApolloError('Cannot make request to GraphQL API, missing baseURL');
+      throw new ApolloError(
+        "Cannot make request to GraphQL API, missing baseURL"
+      );
     }
 
     return baseURL;
@@ -95,10 +101,8 @@ export class GraphQLDataSource<TContext = any> {
   private onErrorLink() {
     return onError(({ graphQLErrors, networkError }) => {
       if (graphQLErrors) {
-        graphQLErrors.map(graphqlError =>
-          console.error(
-            `[GraphQL error]: ${graphqlError.message}`,
-          ),
+        graphQLErrors.map((graphqlError) =>
+          console.error(`[GraphQL error]: ${graphqlError.message}`)
         );
       }
 
